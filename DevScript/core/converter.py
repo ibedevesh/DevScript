@@ -6,27 +6,17 @@ import json
 from dotenv import load_dotenv
 
 def _get_api_key():
-    # First check .env file in current directory by reading it directly
+    # Read directly from .env file with very basic parsing
     env_path = os.path.join(os.getcwd(), '.env')
     if os.path.exists(env_path):
         try:
             with open(env_path, 'r') as f:
-                lines = f.readlines()
-                for line in lines:
+                for line in f:
                     if line.startswith('GOOGLE_API_KEY='):
-                        api_key = line.split('=', 1)[1].strip()
-                        if api_key:
-                            # Clean the API key (remove quotes if present)
-                            api_key = api_key.strip('"\'')
-                            return api_key
-        except:
-            pass
-        
-        # Fallback to load_dotenv if direct reading failed
-        load_dotenv(env_path)
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if api_key:
-            return api_key
+                        api_key = line[len('GOOGLE_API_KEY='):].strip()
+                        return api_key
+        except Exception as e:
+            print(f"Error reading .env file: {str(e)}")
     
     # Then check environment variable
     api_key = os.getenv("GOOGLE_API_KEY")
