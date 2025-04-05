@@ -9,11 +9,17 @@ def clean_api_key(api_key):
     """Clean the API key by removing whitespace, quotes, etc."""
     if not api_key:
         return api_key
-    return api_key.strip().replace('"', '').replace("'", '')
+    # Only strip whitespace but preserve the key exactly as entered
+    return api_key.strip()
 
 def create_env_file(api_key, model, location=None):
     """Create a .env file with the API key and model"""
+    # Don't modify the API key here - keep it exactly as provided
     api_key = clean_api_key(api_key)
+    
+    # Validate the API key looks reasonable
+    if len(api_key) < 10:
+        print("⚠️ Warning: API key seems too short. Please verify it's correct.")
     
     # Determine the location for the .env file
     if location is None:
@@ -21,10 +27,17 @@ def create_env_file(api_key, model, location=None):
     
     env_path = os.path.join(location, '.env')
     
-    # Create the .env file
+    # Create the .env file - use triple quotes to avoid any string escaping issues
     with open(env_path, 'w') as f:
-        f.write(f"GOOGLE_API_KEY={api_key}\n")
-        f.write(f"GOOGLE_MODEL={model}\n")
+        f.write(f'''GOOGLE_API_KEY={api_key}
+GOOGLE_MODEL={model}
+''')
+    
+    # Verify the file was written correctly
+    with open(env_path, 'r') as f:
+        content = f.read()
+        if api_key not in content:
+            print("⚠️ Warning: API key may not have been written correctly to .env file.")
     
     return env_path
 
@@ -34,6 +47,7 @@ def main():
     parser.add_argument("--update-key", action="store_true", help="Update only the API key")
     parser.add_argument("--update-model", action="store_true", help="Update only the model name")
     parser.add_argument("--show-config", action="store_true", help="Show current configuration")
+    parser.add_argument("--debug", action="store_true", help="Show debug information")
     
     # Parse arguments
     args = parser.parse_args()
@@ -50,7 +64,13 @@ def main():
                     config = json.load(f)
                     print("Current configuration:")
                     print(f"Model: {config.get('model', 'Not set')}")
-                    print(f"API key: {'*' * 10 + config.get('api_key', 'Not set')[-5:] if 'api_key' in config and len(config.get('api_key', '')) > 5 else 'Not set or invalid'}")
+                    if 'api_key' in config and config['api_key']:
+                        # Show first 4 chars and last 4 chars with stars in between
+                        key = config['api_key']
+                        masked_key = key[:4] + '*' * (len(key) - 8) + key[-4:] if len(key) > 8 else '****'
+                        print(f"API key: {masked_key}")
+                    else:
+                        print("API key: Not set")
                     print(f"Config file: {config_file}")
                     
                     # Check if .env exists
@@ -183,6 +203,31 @@ def main():
     print(f"✅ Created .env file at: {env_path}")
     print(f"   You can edit this file directly to update your API key.")
     print("You can now run DevScript with 'devscript your_file.ds'")
+    
+    if args.debug:
+        print("Debug Information:")
+        print("-----------------")
+        if os.path.exists(config_file):
+            try:
+                with open(config_file, 'r') as f:
+                    config = json.load(f)
+                    if 'api_key' in config:
+                        key = config['api_key']
+                        print(f"Config API key: {key[:4]}...{key[-4:]} (length: {len(key)})")
+            except Exception as e:
+                print(f"Error reading config: {str(e)}")
+        
+        env_path = os.path.join(os.getcwd(), '.env')
+        if os.path.exists(env_path):
+            try:
+                with open(env_path, 'r') as f:
+                    lines = f.readlines()
+                    for line in lines:
+                        if line.startswith('GOOGLE_API_KEY='):
+                            key_part = line.split('=', 1)[1].strip()
+                            print(f".env API key: {key_part[:4]}...{key_part[-4:]} (length: {len(key_part)})")
+            except Exception as e:
+                print(f"Error reading .env: {str(e)}")
     
     return 0
 
