@@ -13,14 +13,14 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "devscript=devscript.cli:main",
-            "devscript-setup=devscript.setup_cli:main",
+            "devscript=devscript.devscript.cli:main",
+            "devscript-setup=devscript.devscript.setup_cli:main",
         ],
     },
     description="DevScript - AI-powered coding language",
     author="DevScript Team",
     author_email="your.email@example.com",
-    url="https://github.com/yourusername/devscript",
+    url="https://github.com/ibedevesh/devscript",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
