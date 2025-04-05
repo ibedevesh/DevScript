@@ -8,7 +8,7 @@ DevScript is an AI-powered coding language that lets users describe logic natura
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/devscript.git
+git clone https://github.com/ibedevesh/devscript.git
 cd devscript
 ```
 
