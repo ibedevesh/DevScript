@@ -1,6 +1,0 @@
-# Data analysis example
-# Note: You'll need a data.csv file to run this
-load "data.csv"
-show summary statistics
-plot a histogram of the numerical columns
-save the plot as "data_visualization.png"
