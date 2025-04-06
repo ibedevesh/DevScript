@@ -4,6 +4,7 @@ import os
 import requests
 import json
 import sys
+import subprocess
 
 CONFIG_DIR = os.path.expanduser("~/.devscript")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
@@ -155,8 +156,30 @@ def run_python_file(file_path):
         
     print(f"🚀 Running Python code: {file_path}")
     print("-" * 40)
-    os.system(f"python {file_path}")
-    return True
+    
+    try:
+        # Fix: Use direct execution of Python code instead of subprocess
+        with open(file_path, 'r') as f:
+            code = f.read()
+        
+        # Create a namespace to avoid polluting global namespace
+        namespace = {}
+        exec(compile(code, os.path.basename(file_path), 'exec'), namespace)
+        return True
+    except Exception as e:
+        print(f"❌ Error running Python code: {e}")
+        
+        # Fallback: Try with subprocess if direct execution fails
+        try:
+            # Use full path to python executable and quoted path to handle spaces
+            result = subprocess.run([sys.executable, file_path], check=False)
+            if result.returncode != 0:
+                print(f"❌ Python process exited with code {result.returncode}")
+                return False
+            return True
+        except Exception as sub_e:
+            print(f"❌ Subprocess execution also failed: {sub_e}")
+            return False
 
 def show_usage():
     """Show current usage statistics"""
