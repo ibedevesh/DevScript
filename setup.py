@@ -1,9 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name="devscript-client",
     version="0.1.0",
-    packages=find_packages(),
+    py_modules=["devscript_client"],  # Use py_modules instead of find_packages
     install_requires=[
         "requests>=2.25.0",
     ],
@@ -15,7 +15,7 @@ setup(
     description="DevScript client - AI-powered coding language",
     author="DevScript Team",
     author_email="your.email@example.com",
-    url="https://github.com/yourusername/devscript-client",
+    url="https://github.com/ibedevesh/DevScript",  # Updated to your actual GitHub URL
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
