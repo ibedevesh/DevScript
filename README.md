@@ -58,7 +58,7 @@ Count how many customers are from each Country
 save it to "country_count.csv"
 
 ```
-✅ This reads a CSV, groups customers by country, and saves the result — all with just 3 lines.
+    ✅ This reads a CSV, groups customers by country, and saves the result — all with just 3 lines.
 ---
 
 ### Example2: Filter Missing Data
@@ -69,7 +69,7 @@ display Customer Id where either Phone 1 or Phone 2 are missing
 save it to "missing_contacts.csv"
 
 ```
-✅ This finds incomplete phone data and saves the filtered list.
+    ✅ This finds incomplete phone data and saves the filtered list.
 ---
 
 ### Example3: Plotting a Graph
@@ -80,7 +80,7 @@ group by Category
 plot a bar chart of Sales vs Category
 
 ```
-✅ One line to generate a graph. Visual magic.
+    ✅ One line to generate a graph. Visual magic.
 ---
 
 ### Example4: Basic Stats
@@ -92,7 +92,7 @@ calculate the max of Revenue
 print the results
 
 ```
-✅ Get quick insights without writing a single loop.
+    ✅ Get quick insights without writing a single loop.
 ---
 
 ## Usage
