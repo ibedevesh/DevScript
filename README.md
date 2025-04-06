@@ -49,15 +49,50 @@ You’ll be asked to enter your API key for authentication.
 
 DevScript files use the `.ds` extension.
 
-### Example: hello.ds
+### Example1: Analyze a CSV
 
 ```
-print "Hello from DevScript!"
+analyze "customers.csv"
+group by Country
+Count how many customers are from each Country
+save it to "country_count.csv"
 
-name = input "What's your name?"
-print "Nice to meet you, " + name
 ```
+✅ This reads a CSV, groups customers by country, and saves the result — all with just 3 lines.
+---
 
+### Example2: Filter Missing Data
+
+```
+analyze "customers.csv"
+display Customer Id where either Phone 1 or Phone 2 are missing
+save it to "missing_contacts.csv"
+
+```
+✅ This finds incomplete phone data and saves the filtered list.
+---
+
+### Example3: Plotting a Graph
+
+```
+analyze "sales.csv"
+group by Category
+plot a bar chart of Sales vs Category
+
+```
+✅ One line to generate a graph. Visual magic.
+---
+
+### Example4: Basic Stats
+
+```
+analyze "data.csv"
+calculate the average of Revenue
+calculate the max of Revenue
+print the results
+
+```
+✅ Get quick insights without writing a single loop.
 ---
 
 ## Usage
