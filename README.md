@@ -114,6 +114,6 @@ Licensed under the MIT License. See LICENSE file.
 ---
 
 ## Created by Devesh
-DevScript is in early access. Be part of the journey. 🚀 If DevScript is helping you and you want DevScript unlimited access, mail me at: deveshdv760@gmail.com, I will be happy to help you.
+DevScript is in early access. Be part of the journey. 🚀 If you want DevScript for your business with high usage, mail me at: deveshdv760@gmail.com, I will be happy to help you.
 
 ---
