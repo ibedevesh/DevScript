@@ -6,11 +6,12 @@ import json
 import sys
 import subprocess
 import traceback
+import time
 
 CONFIG_DIR = os.path.expanduser("~/.devscript")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 # Remove trailing slash to ensure consistent URL construction
-API_URL = os.environ.get("DEVSCRIPT_API_URL", "https://abababab-production.up.railway.app/").rstrip('/')
+API_URL = os.environ.get("DEVSCRIPT_API_URL", "https://5ff7d937-f336-474e-8eef-0d124eb164d6-00-27jjzeunl02rz.pike.replit.dev/").rstrip('/')
 
 def setup_api_key():
     """Setup or update the user's API key"""
@@ -117,13 +118,23 @@ def explain_error():
         return False
     
     try:
+        # Check if the error file is recent (within the last hour)
+        error_time = os.path.getmtime(error_file)
+        current_time = time.time()
+        time_diff_minutes = (current_time - error_time) / 60
+        
         with open(error_file, "r") as f:
             error_message = f.read()
         
         with open(code_file, "r") as f:
             code = f.read()
         
+        if time_diff_minutes > 60:  # More than an hour old
+            print(f"⚠️ Warning: Using cached error from {int(time_diff_minutes)} minutes ago.")
+            print("Run your code again to generate a fresh error if needed.")
+            
         print("🔍 Analyzing your code and error...")
+        print(f"Sending code ({len(code)} chars) and error ({len(error_message)} chars) to API")
         
         # Call the API
         response = requests.post(
@@ -131,6 +142,8 @@ def explain_error():
             headers={"X-API-Key": api_key},
             json={"code": code, "error": error_message}
         )
+        
+        print(f"Response status: {response.status_code}")
         
         if response.status_code != 200:
             try:
@@ -141,6 +154,9 @@ def explain_error():
             return False
         
         try:
+            # Print raw response for debugging
+            print(f"Raw response: {response.text[:200]}...")
+            
             result = response.json()
             explanation = result.get("explanation", "No explanation available")
             
@@ -157,6 +173,7 @@ def explain_error():
     
     except Exception as e:
         print(f"⚠️ Error: {str(e)}")
+        traceback.print_exc()  # Print full traceback for debugging
         return False
 
 def convert_devscript(file_path, options=None):
