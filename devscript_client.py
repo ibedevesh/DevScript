@@ -11,7 +11,7 @@ import time
 CONFIG_DIR = os.path.expanduser("~/.devscript")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 # Remove trailing slash to ensure consistent URL construction
-API_URL = os.environ.get("DEVSCRIPT_API_URL", "https://5ff7d937-f336-474e-8eef-0d124eb164d6-00-27jjzeunl02rz.pike.replit.dev/").rstrip('/')
+API_URL = os.environ.get("DEVSCRIPT_API_URL", "https://abababab-production.up.railway.app/").rstrip('/')
 
 def setup_api_key():
     """Setup or update the user's API key"""
