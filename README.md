@@ -71,6 +71,10 @@ save it to week.jpeg
 ```
 devscript run hello.ds
 ```
+### Exaplain error in natural language:
+```
+devscript explain
+```
 ### Convert to Python:
 ```
 devscript convert hello.ds
