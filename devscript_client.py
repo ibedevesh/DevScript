@@ -5,6 +5,7 @@ import requests
 import json
 import sys
 import subprocess
+import traceback
 
 CONFIG_DIR = os.path.expanduser("~/.devscript")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
@@ -83,6 +84,81 @@ def get_api_key():
         print("⚠️ Error reading config file.")
         return None
 
+def save_last_error(error_message):
+    """Save the last error to a temporary file"""
+    error_file = os.path.join(CONFIG_DIR, ".devscript_last_error.txt")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    with open(error_file, "w") as f:
+        f.write(error_message)
+
+def save_last_code(code, file_path):
+    """Save the last executed DevScript code"""
+    code_file = os.path.join(CONFIG_DIR, ".devscript_last_code.ds")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    with open(code_file, "w") as f:
+        f.write(code)
+    
+    # Also save the file path for reference
+    path_file = os.path.join(CONFIG_DIR, ".devscript_last_file.txt")
+    with open(path_file, "w") as f:
+        f.write(file_path)
+
+def explain_error():
+    """Explain the last error using the API"""
+    api_key = get_api_key()
+    if not api_key:
+        return False
+    
+    error_file = os.path.join(CONFIG_DIR, ".devscript_last_error.txt")
+    code_file = os.path.join(CONFIG_DIR, ".devscript_last_code.ds")
+    
+    if not os.path.exists(error_file) or not os.path.exists(code_file):
+        print("⚠️ No recent errors found. Run a DevScript file first.")
+        return False
+    
+    try:
+        with open(error_file, "r") as f:
+            error_message = f.read()
+        
+        with open(code_file, "r") as f:
+            code = f.read()
+        
+        print("🔍 Analyzing your code and error...")
+        
+        # Call the API
+        response = requests.post(
+            f"{API_URL}/explain",
+            headers={"X-API-Key": api_key},
+            json={"code": code, "error": error_message}
+        )
+        
+        if response.status_code != 200:
+            try:
+                error = response.json().get('detail', 'API error')
+            except:
+                error = response.text or 'API error'
+            print(f"⚠️ Error: {error}")
+            return False
+        
+        try:
+            result = response.json()
+            explanation = result.get("explanation", "No explanation available")
+            
+            print("\n📘 DevScript Explanation:")
+            print("-" * 40)
+            print(explanation)
+            print("-" * 40)
+            
+            return True
+        except json.JSONDecodeError:
+            print(f"⚠️ Error: Invalid JSON response from API")
+            print(f"Response: {response.text[:200]}...")
+            return False
+    
+    except Exception as e:
+        print(f"⚠️ Error: {str(e)}")
+        return False
+
 def convert_devscript(file_path, options=None):
     """Convert a DevScript file to Python using the API"""
     api_key = get_api_key()
@@ -132,13 +208,16 @@ def convert_devscript(file_path, options=None):
                 
             print(f"✅ Converted DevScript to Python: {py_filepath}")
             
+            # Save the original code for error tracking
+            save_last_code(code, file_path)
+            
             # These fields might not exist in the current API response
             if "tokens_used" in result:
                 print(f"Tokens used: {result['tokens_used']}")
             if "remaining_quota" in result:
                 print(f"Remaining quota: {result['remaining_quota']}")
             
-            return py_filepath
+            return (py_filepath, code)
         except json.JSONDecodeError:
             print(f"⚠️ Error: Invalid JSON response from API")
             print(f"Response: {response.text[:200]}...")
@@ -148,7 +227,7 @@ def convert_devscript(file_path, options=None):
         print(f"⚠️ Error: {str(e)}")
         return False
 
-def run_python_file(file_path):
+def run_python_file(file_path, original_ds_file=None, original_ds_code=None):
     """Run a Python file"""
     if not os.path.exists(file_path):
         print(f"⚠️ File not found: {file_path}")
@@ -156,6 +235,10 @@ def run_python_file(file_path):
         
     print(f"🚀 Running Python code: {file_path}")
     print("-" * 40)
+    
+    # Save the original DevScript code if provided
+    if original_ds_file and original_ds_code:
+        save_last_code(original_ds_code, original_ds_file)
     
     try:
         # Fix: Use direct execution of Python code instead of subprocess
@@ -167,18 +250,32 @@ def run_python_file(file_path):
         exec(compile(code, os.path.basename(file_path), 'exec'), namespace)
         return True
     except Exception as e:
+        error_message = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
         print(f"❌ Error running Python code: {e}")
+        save_last_error(error_message)
         
         # Fallback: Try with subprocess if direct execution fails
         try:
             # Use full path to python executable and quoted path to handle spaces
-            result = subprocess.run([sys.executable, file_path], check=False)
-            if result.returncode != 0:
-                print(f"❌ Python process exited with code {result.returncode}")
+            process = subprocess.Popen(
+                [sys.executable, file_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            stdout, stderr = process.communicate()
+            
+            if process.returncode != 0:
+                print(f"❌ Python process exited with code {process.returncode}")
+                if stderr and not error_message:
+                    save_last_error(stderr)
                 return False
             return True
         except Exception as sub_e:
+            sub_error = f"{type(sub_e).__name__}: {str(sub_e)}\n{traceback.format_exc()}"
             print(f"❌ Subprocess execution also failed: {sub_e}")
+            if not error_message:
+                save_last_error(sub_error)
             return False
 
 def show_usage():
@@ -241,6 +338,9 @@ def main():
     # Usage command
     usage_parser = subparsers.add_parser("usage", help="Show API usage statistics")
     
+    # Explain command
+    explain_parser = subparsers.add_parser("explain", help="Explain the last error")
+    
     args = parser.parse_args()
     
     if args.command == "setup":
@@ -250,15 +350,19 @@ def main():
         if args.model:
             options["model"] = args.model
             
-        py_file = convert_devscript(args.file, options)
-        if py_file and args.run:
-            run_python_file(py_file)
+        result = convert_devscript(args.file, options)
+        if result and args.run:
+            py_file, ds_code = result
+            run_python_file(py_file, args.file, ds_code)
     elif args.command == "run":
-        py_file = convert_devscript(args.file)
-        if py_file:
-            run_python_file(py_file)
+        result = convert_devscript(args.file)
+        if result:
+            py_file, ds_code = result
+            run_python_file(py_file, args.file, ds_code)
     elif args.command == "usage":
         show_usage()
+    elif args.command == "explain":
+        explain_error()
     else:
         parser.print_help()
 
