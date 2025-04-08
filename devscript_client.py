@@ -11,7 +11,7 @@ import time
 CONFIG_DIR = os.path.expanduser("~/.devscript")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 # Remove trailing slash to ensure consistent URL construction
-API_URL = os.environ.get("DEVSCRIPT_API_URL", "https://abababab-production.up.railway.app/").rstrip('/')
+API_URL = os.environ.get("DEVSCRIPT_API_URL", "https://5ff7d937-f336-474e-8eef-0d124eb164d6-00-27jjzeunl02rz.pike.replit.dev/").rstrip('/')
 
 def setup_api_key():
     """Setup or update the user's API key"""
@@ -176,6 +176,25 @@ def explain_error():
         traceback.print_exc()  # Print full traceback for debugging
         return False
 
+def install_dependencies(dependencies):
+    """Install required Python packages using pip"""
+    if not dependencies:
+        return True
+        
+    print(f"📦 Installing dependencies: {', '.join(dependencies)}")
+    
+    try:
+        for package in dependencies:
+            print(f"Installing {package}...")
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", package]
+            )
+        print("✅ All dependencies installed successfully")
+        return True
+    except Exception as e:
+        print(f"⚠️ Error installing dependencies: {str(e)}")
+        return False
+
 def convert_devscript(file_path, options=None):
     """Convert a DevScript file to Python using the API"""
     api_key = get_api_key()
@@ -227,6 +246,12 @@ def convert_devscript(file_path, options=None):
             
             # Save the original code for error tracking
             save_last_code(code, file_path)
+            
+            # Handle dependencies if they are included in the response
+            if "dependencies" in result and result["dependencies"]:
+                dependencies = result["dependencies"]
+                print(f"📦 Dependencies detected: {', '.join(dependencies)}")
+                install_dependencies(dependencies)
             
             # These fields might not exist in the current API response
             if "tokens_used" in result:
