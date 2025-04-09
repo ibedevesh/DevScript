@@ -5,10 +5,10 @@
 
 ## Features
 - Write code by simply describing the logic — no syntax memorization needed
-- Auto-converts your instructions to Python under the hood
-- Build full Python programs just by explaining what you want to do
+- Supports Python Logic (Expanding...)
+- Write programs in natural language
+- Automatically installs dependencies, modules, and other requirements needed to run the program
 - Perform data analysis and CSV automation with ease — your data stays local and secure
-- Works offline with API key–based authentication
 - Comes with a simple, no-fuss CLI interface
 
 ---
