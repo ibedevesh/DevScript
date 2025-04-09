@@ -64,6 +64,16 @@ use red color to indicate most number of accidents
 save it to week.jpeg
 ```
 
+### **Example3:**
+```
+analyse heart.csv
+count number of patients to the Pre-existing Conditions
+Save this to patients.csv
+calculate the most number of patients to the Pre-existing Conditions
+print The majority of patients were already suffering from "Pre-existing Conditions"
+```
+![Alt text](assets/ExpHeart.png)
+
 ---
 
 ## Usage
