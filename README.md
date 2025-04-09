@@ -6,7 +6,7 @@
 ## Features
 - Write code by simply describing the logic — no syntax memorization needed
 - Supports Python Logic (Expanding...)
-- Write programs in natural language
+- Write programs, automations in natural language
 - Automatically installs dependencies, modules, and other requirements needed to run the program
 - Perform data analysis and CSV automation with ease — your data stays local and secure
 - Comes with a simple, no-fuss CLI interface
