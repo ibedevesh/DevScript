@@ -50,10 +50,7 @@ You'll be asked to enter your API key for authentication. Enter : devscript-test
 DevScript files use the `.ds` extension.
 ### **Example1:**
 ```
-analyse chocolate.csv
-list all Sales Person from Country India
-Sort them into descending order of Boxes Shipped
-Save it to India.csv
+Print Hello DevScript!
 ```
 
 ### **Example2:**
