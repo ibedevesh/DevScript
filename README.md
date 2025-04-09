@@ -60,6 +60,8 @@ plot a pie chart according to the number of accidents to the "Day of Week"
 use red color to indicate most number of accidents
 save it to week.jpeg
 ```
+![Alt text](assets/week.jpeg)
+
 
 ### **Example3:**
 ```
